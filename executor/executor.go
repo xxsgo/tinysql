@@ -384,15 +384,16 @@ func (e *SelectionExec) Next(ctx context.Context, req *chunk.Chunk) error {
 		return e.unBatchedNext(ctx, req)
 	}
 
+	/*
+		Exit the loop when:
+			1. the `req` chunk` is full.
+			2. there is no further results from child.
+			3. meets any error.
+	 */
 	for {
+		// Fill in the `req` util it is full or the `inputIter` is fully processed.
 		for ; e.inputRow != e.inputIter.End(); e.inputRow = e.inputIter.Next() {
-			if !e.selected[e.inputRow.Idx()] {
-				continue
-			}
-			if req.IsFull() {
-				return nil
-			}
-			req.AppendRow(e.inputRow)
+			// Your code here.
 		}
 		err := Next(ctx, e.children[0], e.childResult)
 		if err != nil {
@@ -402,11 +403,9 @@ func (e *SelectionExec) Next(ctx context.Context, req *chunk.Chunk) error {
 		if e.childResult.NumRows() == 0 {
 			return nil
 		}
-		e.selected, err = expression.VectorizedFilter(e.ctx, e.filters, e.inputIter, e.selected)
-		if err != nil {
-			return err
-		}
-		e.inputRow = e.inputIter.Begin()
+		/* Your code here.
+		   Process and filter the child result using `expression.VectorizedFilter`.
+		 */
 	}
 }
 
